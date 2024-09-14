@@ -1,0 +1,63 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+require 'dotenv'
+project_number = nil
+android_app_id = nil
+service_account_file = nil
+service_account_key_file = '../service_account_key/'
+
+platform :android do
+  before_all do
+    Dotenv.overload '../../.env'
+    environment = lane_context[SharedValues::ENVIRONMENT]
+    unless environment.nil?
+        Dotenv.overload '../../.env.' + environment
+    end
+    project_number = ENV['FIREBASE_PROJECT_NUMBER']
+    android_app_id = ENV['ANDROID_APP_ID']
+    service_account_file = ENV['SERVICE_ACCOUNT_FILE']
+    service_account_key_file = service_account_key_file + service_account_file
+  end
+
+  desc "Submit a new Build to Firebase AppDistribution"
+  lane :beta do
+    gradle(task: "clean assembleRelease")
+
+    firebase_app_distribution_create_group(
+        project_number: project_number,
+        service_credentials_file: service_account_key_file,
+        display_name:"testers",
+        alias:"testers"
+    )
+
+    firebase_app_distribution_create_group(
+        project_number: project_number,
+        service_credentials_file: service_account_key_file,
+        display_name:"clients",
+        alias:"clients"
+    )
+
+    firebase_app_distribution(
+        app: android_app_id,
+        service_credentials_file: service_account_key_file,
+        apk_path: "../build/app/outputs/flutter-apk/app-release.apk",
+        groups: "testers",
+        release_notes_file: "../release_note/release_note.txt"
+    )
+  end
+end

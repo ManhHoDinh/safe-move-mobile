@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "722720840680",
+    "project_id": "success-mania-86e8e",
+    "storage_bucket": "success-mania-86e8e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722720840680:android:9b5341e846c452dbfae25d",
+        "android_client_info": {
+          "package_name": "com.success_mania.success_mania_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722720840680-674f4160gc6ifmrl90p91vf6960icsmo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.success_mania.success_mania_mobile",
+            "certificate_hash": "d5a8abe02f5a45102266a1a08369cbd863a42454"
+          }
+        },
+        {
+          "client_id": "722720840680-curtbuqliiura0f5b4a7pkbka6ftq059.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.success_mania.success_mania_mobile",
+            "certificate_hash": "b54dc9a1eb8c4d61d265ce78b584c0092af973ad"
+          }
+        },
+        {
+          "client_id": "722720840680-nblt500ob28nlrgul8e1p1m788qmqf8d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.success_mania.success_mania_mobile",
+            "certificate_hash": "4a176dc8d6eafccc15d74d36288ab4a54499510e"
+          }
+        },
+        {
+          "client_id": "722720840680-0okkle89nec6jf772o5dt325ink0fddq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgMQLSVQH34Ol9vbcX1QPtUwFfsikhZGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722720840680-0okkle89nec6jf772o5dt325ink0fddq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "722720840680-6a4tfvj4fhfqg1hbf1o3p3a0v2nsijco.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.successMania.successManiaMobile"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>722720840680-g692eokvs6839pg53acfp14sqn5p4alo.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.722720840680-g692eokvs6839pg53acfp14sqn5p4alo</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>722720840680-674f4160gc6ifmrl90p91vf6960icsmo.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAMdNlX-bV_35cIEJE_dQedXWKyfu9nnSk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>722720840680</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.successMania.successManiaMobile</string>
+	<key>PROJECT_ID</key>
+	<string>success-mania-86e8e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>success-mania-86e8e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:722720840680:ios:3ed9c97eb13d5da6fae25d</string>
+</dict>
+</plist>
