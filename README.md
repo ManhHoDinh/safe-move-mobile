@@ -1,187 +1,40 @@
-# kimes_mobile
+## Safe Move
 
-A new Flutter project.
+## Installation
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-# kimes-mobile
-
-## SDK Version
-
-- Flutter: 3.19.3
-- `lcov` installed with `choco` on `Windows` or `brew` on UNIX
-
-## **INIT VERY IMPORTANT**
-
-```shell
-make
-```
-
-or
-
-```shell
-make init
-```
-
-## Color gen + Assets gen + Route gen + Language gen
-
-```shell
-make gen
-```
-
-### Color gen
-
-```shell
-make gen-color
-```
-
-### Locale gen
-
-```shell
-make gen-locale
-```
-
-## Clean
-
-```shell
-make clean
-```
-
-## Get
-
-```shell
-make get
-```
-
-## Format
-
-```shell
-make format
-```
-
-## Analyze
-
-```shell
-make lint
-```
-
-## Build
-
-```shell
-make build
-```
-
-### Debug
-
-```shell
-make build-debug
-```
-
-### Profile
-
-```shell
-make build-profile
-```
-
-### Release
-
-```shell
-make build-release
-```
-
-## Test
-
-```shell
-make test
-```
-
-## Image generation guide
-
-- Add to `assets/`
-- Add to `pubspec.yaml`
-- Add to `assets_loader_handler.dart` // search this file
-
-## Match passphrase
+To install the app, you will need to have the following installed:
 
 ```
-kimes
+Flutter SDK
+Dart plugins
 ```
 
-## Fastlane
-
-- Register device
-```shell
-make lane-device
-```
-
-- Beta (Firebase App Distribution)
-
-```shell
-make lane
-```
-
-## Tag
-
-- Local
+Once you have the required dependencies installed, you can run the following command from the root directory of your app:
 
 ```
-git tag -a <tag_name> -m "<message>"
+flutter pub get
 ```
 
-- Delete local:
+## Usage
+
+To start the app, simply run the following command from the root directory of your app:
 
 ```
-git tag --delete <tag_name>
+flutter run
 ```
 
-- Remote:
+The app allows users to monitor and manage traffic flow efficiently. Features include real-time traffic updates, route planning, and traffic density analysis.
 
-```
-git push origin <tag_name>
-```
+## Troubleshooting
 
-- Delete remote:
+If you are having problems installing or using the app, please try the following:
 
-```
-git push -d origin <tag_name>
-```
+- Ensure you have the latest version of the [Flutter SDK](https://docs.flutter.dev/get-started/install) and all necessary plugins.
+- Try restarting your device.
+- For more help, visit the [Flutter documentation](https://docs.flutter.dev/).
 
-- Push all tags:
+## Additional Information
 
-```
-git push --tags
-```
+Developed by: [Manh Ho Dinh](https://github.com/ManhHoDinh) - [Hang Le](https://github.com/BichHang21522041)
 
-
-## Gen App Icon
-
-dart run flutter_launcher_icons
-
-## Gen App Splash
-
-To gen
-
-```shell
-dart run flutter_native_splash:create
-```
-
-To remove
-
-```shell
-dart run flutter_native_splash:remove
-```
-
-
-## To rename app
-- https://pub.dev/packages/rename
+Contact us at: 21522327@gm.uit.edu.vn

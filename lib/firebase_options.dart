@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -49,24 +43,43 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBVFGtHueDHqQ0siCL4qMlmOwpUFkZutUk',
+    appId: '1:844473077697:web:ac6f9237859dd15f416940',
+    messagingSenderId: '844473077697',
+    projectId: 'trafficsolution-395806',
+    authDomain: 'trafficsolution-395806.firebaseapp.com',
+    storageBucket: 'trafficsolution-395806.appspot.com',
+    measurementId: 'G-C5Q88TD5Y1',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCgMQLSVQH34Ol9vbcX1QPtUwFfsikhZGY',
-    appId: '1:722720840680:android:9b5341e846c452dbfae25d',
-    messagingSenderId: '722720840680',
-    projectId: 'success-mania-86e8e',
-    storageBucket: 'success-mania-86e8e.appspot.com',
+    apiKey: 'AIzaSyBVFGtHueDHqQ0siCL4qMlmOwpUFkZutUk',
+    appId: '1:844473077697:android:93fb2d9b759260d1416940',
+    messagingSenderId: '844473077697',
+    projectId: 'trafficsolution-395806',
+    storageBucket: 'trafficsolution-395806.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAMdNlX-bV_35cIEJE_dQedXWKyfu9nnSk',
-    appId: '1:722720840680:ios:3ed9c97eb13d5da6fae25d',
-    messagingSenderId: '722720840680',
-    projectId: 'success-mania-86e8e',
-    storageBucket: 'success-mania-86e8e.appspot.com',
-    androidClientId:
-        '722720840680-674f4160gc6ifmrl90p91vf6960icsmo.apps.googleusercontent.com',
-    iosClientId:
-        '722720840680-6a4tfvj4fhfqg1hbf1o3p3a0v2nsijco.apps.googleusercontent.com',
-    iosBundleId: 'com.successMania.successManiaMobile',
+    apiKey: 'AIzaSyDUkhe92uHnbl8UKNN9AB0ZfqQOyjGoYtU',
+    appId: '1:844473077697:ios:7e9264980a8c1f9e416940',
+    messagingSenderId: '844473077697',
+    projectId: 'trafficsolution-395806',
+    storageBucket: 'trafficsolution-395806.appspot.com',
+    androidClientId: '844473077697-8c5kc5qbm0tr9a4i8gfv3dhm16g6tpt2.apps.googleusercontent.com',
+    iosClientId: '844473077697-s2fj3ed5edqolcl7csa65v4s2jc2jec0.apps.googleusercontent.com',
+    iosBundleId: 'com.example.trafficSolutionDsc',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDUkhe92uHnbl8UKNN9AB0ZfqQOyjGoYtU',
+    appId: '1:844473077697:ios:9f776b0d17941915416940',
+    messagingSenderId: '844473077697',
+    projectId: 'trafficsolution-395806',
+    storageBucket: 'trafficsolution-395806.appspot.com',
+    androidClientId: '844473077697-8c5kc5qbm0tr9a4i8gfv3dhm16g6tpt2.apps.googleusercontent.com',
+    iosClientId: '844473077697-4q5j8978fvg6b1un6jgaudr3m7a9c59s.apps.googleusercontent.com',
+    iosBundleId: 'com.example.trafficSolutionDsc.RunnerTests',
   );
 }

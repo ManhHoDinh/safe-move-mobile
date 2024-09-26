@@ -1,53 +1,80 @@
-@MappableLib(generateInitializerForScope: InitializerScope.directory)
-import 'package:dart_mappable/dart_mappable.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:provider/provider.dart';
+import 'package:traffic_solution_dsc/core/services/firebase_options.dart';
+import 'package:traffic_solution_dsc/presentation/screens/splash/splash_screen.dart';
+import 'package:traffic_solution_dsc/routes/routes.dart';
+import 'package:flow_builder/flow_builder.dart';
+import './presentation/repositories/repositories.dart';
+import './presentation/blocs/bloc_observer.dart';
+import './presentation/blocs/app/app_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'di/di.dart';
-import 'firebase_options.dart';
-import 'main.init.dart';
-import 'presentation/app.dart';
-import 'presentation/bases/bloc_utils/observer/app_bloc_observer.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  initializeMappers();
-  Provider.debugCheckInvalidValueType = null;
-  Bloc.observer = AppBlocObserver();
-
-  final initFirebaseFuture = initFirebase();
-  final initDIServiceFuture = initService();
-
-  await Future.wait([
-    initFirebaseFuture,
-    lockOrientation(),
-    initService(),
-  ]);
-
-  final diData = await initDIServiceFuture;
-
-  KakaoSdk.init(nativeAppKey: diData.config.kakaoNativeAppKey);
-
-  runApp(SuccessManiaApp(
-    data: diData,
-  ));
+Future<bool> isFirstTimeUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isFirstTimeUser') ?? true;
 }
 
-Future<void> initFirebase() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+bool firstTimeUser = true;
+Future<void> main() {
+  return BlocOverrides.runZoned(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      firstTimeUser = await isFirstTimeUser();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+
+      final authRepository = AuthRepository();
+      runApp(MyApp(authRepository: authRepository));
+    },
+    blocObserver: AppBlocObserver(),
   );
 }
 
-Future<void> lockOrientation() {
-  return SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+    required AuthRepository authRepository,
+  })  : _authRepository = authRepository,
+        super(key: key);
+
+  final AuthRepository _authRepository;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepositoryProvider.value(
+      value: _authRepository,
+      child: BlocProvider(
+        create: (_) => AppBloc(
+          authRepository: _authRepository,
+        ),
+        child: const AppView(),
+      ),
+    );
+  }
 }
 
-Future<AppDIData> initService() {
-  final AppDIService appDIService = AppDIService();
-  return appDIService.load();
+class AppView extends StatefulWidget {
+  const AppView({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<AppView> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: firstTimeUser
+          ? SplashScreen()
+          : FlowBuilder<AppStatus>(
+              state: context.select((AppBloc bloc) => bloc.state.status),
+              onGeneratePages: onGenerateAppViewPages,
+            ),
+    );
+  }
 }

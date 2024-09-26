@@ -1,64 +1,48 @@
 {
   "project_info": {
-    "project_number": "722720840680",
-    "project_id": "success-mania-86e8e",
-    "storage_bucket": "success-mania-86e8e.appspot.com"
+    "project_number": "844473077697",
+    "project_id": "trafficsolution-395806",
+    "storage_bucket": "trafficsolution-395806.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:722720840680:android:9b5341e846c452dbfae25d",
+        "mobilesdk_app_id": "1:844473077697:android:93fb2d9b759260d1416940",
         "android_client_info": {
-          "package_name": "com.success_mania.success_mania_mobile"
+          "package_name": "com.example.traffic_solution_dsc"
         }
       },
       "oauth_client": [
         {
-          "client_id": "722720840680-674f4160gc6ifmrl90p91vf6960icsmo.apps.googleusercontent.com",
+          "client_id": "844473077697-8c5kc5qbm0tr9a4i8gfv3dhm16g6tpt2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.success_mania.success_mania_mobile",
-            "certificate_hash": "d5a8abe02f5a45102266a1a08369cbd863a42454"
+            "package_name": "com.example.traffic_solution_dsc",
+            "certificate_hash": "bfe4943ac92dc3260aa9880b3ee81c2b415ecd10"
           }
         },
         {
-          "client_id": "722720840680-curtbuqliiura0f5b4a7pkbka6ftq059.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.success_mania.success_mania_mobile",
-            "certificate_hash": "b54dc9a1eb8c4d61d265ce78b584c0092af973ad"
-          }
-        },
-        {
-          "client_id": "722720840680-nblt500ob28nlrgul8e1p1m788qmqf8d.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.success_mania.success_mania_mobile",
-            "certificate_hash": "4a176dc8d6eafccc15d74d36288ab4a54499510e"
-          }
-        },
-        {
-          "client_id": "722720840680-0okkle89nec6jf772o5dt325ink0fddq.apps.googleusercontent.com",
+          "client_id": "844473077697-5m7f4dr20gk2vrvboh59brf9vg2q2ceb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCgMQLSVQH34Ol9vbcX1QPtUwFfsikhZGY"
+          "current_key": "AIzaSyCL_Kn3lVo4ebBk9RdObFCAxUUEqvkswVs"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "722720840680-0okkle89nec6jf772o5dt325ink0fddq.apps.googleusercontent.com",
+              "client_id": "844473077697-5m7f4dr20gk2vrvboh59brf9vg2q2ceb.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "722720840680-6a4tfvj4fhfqg1hbf1o3p3a0v2nsijco.apps.googleusercontent.com",
+              "client_id": "844473077697-4q5j8978fvg6b1un6jgaudr3m7a9c59s.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.successMania.successManiaMobile"
+                "bundle_id": "com.example.trafficSolutionDsc.RunnerTests"
               }
             }
           ]

@@ -1,8 +1,0 @@
-synthetic-package: false
-arb-dir: lib/presentation/l10n
-template-arb-file: app_ko.arb
-output-localization-file: app_localizations.dart
-output-dir: lib/presentation/gen/locale
-untranslated-messages-file: lib/presentation/gen/locale/untranslated.json
-output-class: S
-nullable-getter: false

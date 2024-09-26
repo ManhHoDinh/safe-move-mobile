@@ -1,5 +1,0 @@
-v0.1.1
-- InkWell effect
-- Correct assets
-- Auto reload on logo tap
-- Forum floating button extra space

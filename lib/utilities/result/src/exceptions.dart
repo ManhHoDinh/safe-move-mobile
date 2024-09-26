@@ -1,1 +1,0 @@
-class NoValueError implements Exception {}

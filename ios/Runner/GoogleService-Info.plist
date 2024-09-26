@@ -3,23 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>722720840680-g692eokvs6839pg53acfp14sqn5p4alo.apps.googleusercontent.com</string>
+	<string>844473077697-s2fj3ed5edqolcl7csa65v4s2jc2jec0.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.722720840680-g692eokvs6839pg53acfp14sqn5p4alo</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>722720840680-674f4160gc6ifmrl90p91vf6960icsmo.apps.googleusercontent.com</string>
+	<string>com.googleusercontent.apps.844473077697-s2fj3ed5edqolcl7csa65v4s2jc2jec0</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAMdNlX-bV_35cIEJE_dQedXWKyfu9nnSk</string>
+	<string>AIzaSyDUkhe92uHnbl8UKNN9AB0ZfqQOyjGoYtU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>722720840680</string>
+	<string>844473077697</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.successMania.successManiaMobile</string>
+	<string>com.example.trafficSolutionDsc</string>
 	<key>PROJECT_ID</key>
-	<string>success-mania-86e8e</string>
+	<string>trafficsolution-395806</string>
 	<key>STORAGE_BUCKET</key>
-	<string>success-mania-86e8e.appspot.com</string>
+	<string>trafficsolution-395806.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:722720840680:ios:3ed9c97eb13d5da6fae25d</string>
+	<string>1:844473077697:ios:7e9264980a8c1f9e416940</string>
 </dict>
 </plist>

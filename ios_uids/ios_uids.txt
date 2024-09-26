@@ -1,4 +1,0 @@
-Device ID	Device Name	Device Platform
-c9f4c442a8cd899b611e3d592ea270f93cd82011	manhtu2272002@gmail.com - iPhone X	ios
-0b9c9afba7752432d9dc7deaccab7c267c0d7359	hoduybaoo@gmail.com - iPhone 7 Plus	ios
-b243f931a2c3997b07af19b6d1233cb19874cecc	anle.drewindeed@gmail.com - iPhone X	ios
