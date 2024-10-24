@@ -1,10 +1,20 @@
 class AssetHelper {
   //Assets in icons
-  static const String ImageAssets = 'assets/images/';
-  static const String icoStore = '${ImageAssets}store.png';
-  static const String imgNoData = '${ImageAssets}noData.png';
-  //static const String icoStore = '${ImageAssets}store.png';
+  static const String imgAssets = 'assets/images/';
+  static const String icoStore = '${imgAssets}store.png';
+  static const String imgNoData = '${imgAssets}noData.png';
+  static const String safeMoveLogo = '${imgAssets}SafeMoveLogo.png';
 
+  /// auth screen
+  static const String icoLock = imgAssets + 'ico_lock.png';
+  static const String icoLogin = imgAssets + 'ico_login.png';
+  static const String icoGoogle = imgAssets + 'googleIcon.png';
+  static const String icoChecked = imgAssets + 'ico_checked.png';
+  static const String icoCanceled = imgAssets + 'ico_canceled.png';
+  static const String icoEmail = imgAssets + 'icon_email.png';
+  static const String icoPhoneNumber = imgAssets + 'call.png';
+  static const String banner = imgAssets + 'SafeMoveLogo.png';
+  static const String icoUser = imgAssets + 'ico_user.png';
   // Icons
   static const String _root = 'assets/icons';
 

@@ -1,80 +1,107 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:traffic_solution_dsc/core/helper/AuthFunctions.dart';
+import 'package:traffic_solution_dsc/core/helper/app_colors.dart';
 import 'package:traffic_solution_dsc/core/services/firebase_options.dart';
+import 'package:traffic_solution_dsc/presentation/screens/HomeScreen/HomeScreen.dart';
 import 'package:traffic_solution_dsc/presentation/screens/splash/splash_screen.dart';
-import 'package:traffic_solution_dsc/routes/routes.dart';
-import 'package:flow_builder/flow_builder.dart';
-import './presentation/repositories/repositories.dart';
-import './presentation/blocs/bloc_observer.dart';
-import './presentation/blocs/app/app_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-Future<bool> isFirstTimeUser() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('isFirstTimeUser') ?? true;
-}
+import 'presentation/Routes/app_router.dart';
+import 'presentation/screens/AuthScreen/login_screen.dart';
 
 bool firstTimeUser = true;
-Future<void> main() {
-  return BlocOverrides.runZoned(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      firstTimeUser = await isFirstTimeUser();
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-
-      final authRepository = AuthRepository();
-      runApp(MyApp(authRepository: authRepository));
-    },
-    blocObserver: AppBlocObserver(),
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  runApp(SafeMoveApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
-    Key? key,
-    required AuthRepository authRepository,
-  })  : _authRepository = authRepository,
-        super(key: key);
+class SafeMoveApp extends StatefulWidget {
+  const SafeMoveApp({super.key});
 
-  final AuthRepository _authRepository;
+  @override
+  State<SafeMoveApp> createState() => _SafeMoveAppState();
+}
+
+class _SafeMoveAppState extends State<SafeMoveApp> {
+  var auth = FirebaseAuth.instance;
+  bool isLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: _authRepository,
-      child: BlocProvider(
-        create: (_) => AppBloc(
-          authRepository: _authRepository,
-        ),
-        child: const AppView(),
+    return MaterialApp(
+      title: 'SafeMove',
+      theme: ThemeData(
+        primaryColor: AppColors.primary,
+        scaffoldBackgroundColor: AppColors.contentColorWhite,
       ),
+      home: AuthenticationWrapper(),
+      routes: routes,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class AppView extends StatefulWidget {
-  const AppView({
-    Key? key,
-  }) : super(key: key);
+class AuthenticationWrapper extends StatefulWidget {
+  const AuthenticationWrapper({super.key});
 
   @override
-  State<AppView> createState() => _AppViewState();
+  AuthenticationWrapperState createState() => AuthenticationWrapperState();
 }
 
-class _AppViewState extends State<AppView> {
+class AuthenticationWrapperState extends State<AuthenticationWrapper> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Wait for 5 seconds and then hide the splash screen
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _showSplash = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: firstTimeUser
-          ? SplashScreen()
-          : FlowBuilder<AppStatus>(
-              state: context.select((AppBloc bloc) => bloc.state.status),
-              onGeneratePages: onGenerateAppViewPages,
-            ),
-    );
+    return _showSplash
+        ? SplashScreen()
+        : StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SplashScreen();
+              } else {
+                if (snapshot.hasData) {
+                  return FutureBuilder(
+                    future: AuthServices.UpdateCurrentUser(),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<void> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // Show a loading indicator if necessary
+                        return SplashScreen();
+                      } else {
+                        // If the update is complete, navigate to the MainScreen
+                        return HomeScreen();
+                      }
+                    },
+                  );
+                } else {
+                  //return Onboarding();
+                  return LoginScreen();
+                }
+              }
+            },
+          );
   }
 }

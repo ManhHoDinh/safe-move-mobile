@@ -76,7 +76,7 @@ class _DirectionScreenState extends State<DirectionScreen> {
 
     context
         .read<HomeCubit>()
-        .getCameraPostion(DirectionScreen._source ?? defaultLatLng);
+        .setCameraPosition(DirectionScreen._source ?? defaultLatLng);
   }
 
   @override
@@ -145,12 +145,21 @@ class _DirectionScreenState extends State<DirectionScreen> {
                                         SizedBox(
                                           width: 20,
                                         ),
-                                        Text((duration.inHours != 0
-                                                ? "${duration.inHours} hr "
-                                                : "") +
-                                            "${duration.inMinutes % 60} min ", style: TextStyle(color: Colors.green, fontSize: 25),),
-                                        Text(distance / 1000>1?
-                                            "(${(distance / 1000).toStringAsFixed(0)} km)":"(${(distance % 1000).toStringAsFixed(0)} m)", style: TextStyle(fontSize: 25),)
+                                        Text(
+                                          (duration.inHours != 0
+                                                  ? "${duration.inHours} hr "
+                                                  : "") +
+                                              "${duration.inMinutes % 60} min ",
+                                          style: TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 25),
+                                        ),
+                                        Text(
+                                          distance / 1000 > 1
+                                              ? "(${(distance / 1000).toStringAsFixed(0)} km)"
+                                              : "(${(distance % 1000).toStringAsFixed(0)} m)",
+                                          style: TextStyle(fontSize: 25),
+                                        )
                                       ],
                                     )
                                   ],

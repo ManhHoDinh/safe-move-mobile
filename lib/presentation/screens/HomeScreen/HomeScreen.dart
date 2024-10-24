@@ -6,19 +6,21 @@ import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:custom_marker/marker_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:traffic_solution_dsc/core/constraints/status.dart';
 import 'package:traffic_solution_dsc/core/helper/assets_helper.dart';
+import 'package:traffic_solution_dsc/core/models/camera/camera.dart';
 import 'package:traffic_solution_dsc/core/models/placeNear/locations.dart';
 import 'package:traffic_solution_dsc/core/models/search/mapbox/feature.dart';
-import 'package:traffic_solution_dsc/core/models/store/store.dart';
-import 'package:traffic_solution_dsc/core/models/streetSegment/streetSegment.dart';
 import 'package:traffic_solution_dsc/core/networks/firebase_request.dart';
+import 'package:traffic_solution_dsc/presentation/screens/CameraDetail/CameraDetail.dart';
 import 'package:traffic_solution_dsc/presentation/screens/Direction/SubScreen/DirectionScreen.dart';
 import 'package:traffic_solution_dsc/presentation/screens/Direction/chooseLocation.dart';
 import 'package:traffic_solution_dsc/presentation/screens/HomeScreen/cubit/home_cubit.dart';
@@ -67,14 +69,14 @@ class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  static const LatLng _pVNUDorm =
-      LatLng(10.882495758523962, 106.78255494069631);
-  static const CameraPosition _kBVNUDorm = CameraPosition(
-    target: _pVNUDorm,
-    zoom: 16,
+  // static const LatLng _pVNUDorm =
+  //     LatLng(10.882495758523962, 106.78255494069631);
+  static const CameraPosition initCamera = CameraPosition(
+    target: LatLng(10.80498476893258, 106.75270736217499),
+    zoom: 11,
   );
   LatLng defaultLocation = LatLng(0, 0);
-  static const LatLng _pUIT = LatLng(10.870251224876043, 106.80337596158505);
+  //static const LatLng _pUIT = LatLng(10.870251224876043, 106.80337596158505);
   late BitmapDescriptor enableStoreIcon;
   late BitmapDescriptor selectedStoreIcon;
   late BitmapDescriptor disableStoreIcon;
@@ -115,30 +117,17 @@ class MapSampleState extends State<MapSample> {
     return customIcon;
   }
 
-  getStoreMarker(Store e) async {
-    markers.add(Marker(
-        markerId: MarkerId(e.id!),
-        position: LatLng(e.latitude!, e.longitude!),
-        icon: (e.status ?? true) ? enableStoreIcon : disableStoreIcon,
-        onTap: () {
-          print("Hello");
-        }));
-  }
+  // getStoreMarker(Store e) async {
+  //   markers.add(Marker(
+  //       markerId: MarkerId(e.id!),
+  //       position: LatLng(e.latitude!, e.longitude!),
+  //       icon: (e.status ?? true) ? enableStoreIcon : disableStoreIcon,
+  //       onTap: () {
+  //         print("Hello");
+  //       }));
+  // }
 
 // created method for getting user current location
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    Position currentPosition = await Geolocator.getCurrentPosition();
-
-    source = LatLng(currentPosition.latitude, currentPosition.longitude);
-    print("Source $source");
-    return currentPosition;
-  }
 
   Set<Marker> markers = {};
   Future<void> moveCamera(CameraPosition camera) async {
@@ -156,7 +145,6 @@ class MapSampleState extends State<MapSample> {
 
   late BitmapDescriptor customIcon;
   Set<Polyline> _polylines = {};
-  List<StreetSegment> streetSegments = [];
   LatLng source = LatLng(0, 0);
   LatLng destination = LatLng(0, 0);
   String sourceText = 'Your location';
@@ -165,23 +153,164 @@ class MapSampleState extends State<MapSample> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getUserCurrentLocation();
+
     WidgetsFlutterBinding.ensureInitialized();
 
     WidgetsBinding.instance.endOfFrame.then((value) async {
-      getUserCurrentLocation();
-
       getIcon().whenComplete(() {
         setState(() {});
       });
-      getUserCurrentLocation();
-      context.read<HomeCubit>().getCameraPostion(_pVNUDorm);
+      source = await context
+          .read<HomeCubit>()
+          .getUserCurrentLocation()
+          .whenComplete(() => setState(() {}));
+
+      moveCamera(CameraPosition(target: source, zoom: 11));
       final GoogleMapsFlutterPlatform mapsImplementation =
           GoogleMapsFlutterPlatform.instance;
       if (mapsImplementation is GoogleMapsFlutterAndroid) {
         mapsImplementation.useAndroidViewSurface = true;
-        initializeMapRenderer();
+        //initializeMapRenderer();
       }
+    });
+    _loadCameras();
+  }
+
+  Future<void> _loadCameras() async {
+    List<Camera> cameras = await context.read<HomeCubit>().fetchCameras();
+    print(cameras);
+    setState(() {
+      markers.addAll(cameras.map((camera) {
+        return Marker(
+          markerId: MarkerId(camera.id!),
+          position: LatLng(camera.location!.coordinates![1],
+              camera.location!.coordinates![0]),
+          infoWindow: InfoWindow(title: camera.name),
+          onTap: () {
+            context
+                .read<HomeCubit>()
+                .getPlaceNear(LatLng(camera.location!.coordinates![1],
+                    camera.location!.coordinates![0]))
+                .then((value) => {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            if (value.status == StatusType.loaded) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CameraDetailScreen(
+                                          cameraData: camera),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 180,
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Text(
+                                              toBeginningOfSentenceCase(
+                                                      camera.name) ??
+                                                  '',
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20),
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(toBeginningOfSentenceCase(
+                                                        value
+                                                            .locationSelected!
+                                                            .results!
+                                                            .first
+                                                            .name) ??
+                                                    ''),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(toBeginningOfSentenceCase(
+                                                        value
+                                                            .locationSelected!
+                                                            .results!
+                                                            .first
+                                                            .address) ??
+                                                    ''),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        destinationText =
+                                            toBeginningOfSentenceCase(value
+                                                    .locationSelected!
+                                                    .results!
+                                                    .first
+                                                    .name) ??
+                                                '';
+                                        Location? location = value
+                                            .locationSelected!
+                                            .results!
+                                            .first
+                                            .location;
+                                        destination = LatLng(location!.lat ?? 0,
+                                            location.lng ?? 0);
+
+                                        print(source);
+                                        print(destination);
+
+                                        if (checkCanRoute())
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      DirectionScreen.providers(
+                                                          sourceText,
+                                                          source,
+                                                          destinationText,
+                                                          destination)));
+                                        else
+                                          print("error");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(20),
+                                        child: Icon(
+                                            FontAwesomeIcons.locationArrow),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return Container(
+                              height: 150,
+                              width: double.infinity,
+                            );
+                          })
+                    });
+          },
+        );
+      }));
     });
   }
 
@@ -217,12 +346,14 @@ class MapSampleState extends State<MapSample> {
                     LatLng latLng = LatLng(
                         location.center!.elementAt(1), location.center!.first);
 
-                    setState((){markers.addLabelMarker(LabelMarker(
-                        label: location.text!,
-                        markerId: MarkerId(location.text!),
-                        position: latLng,
-                        backgroundColor: Colors.green,
-                        icon: BitmapDescriptor.defaultMarker));});
+                    setState(() {
+                      markers.addLabelMarker(LabelMarker(
+                          label: location.text!,
+                          markerId: MarkerId(location.text!),
+                          position: latLng,
+                          backgroundColor: Colors.green,
+                          icon: BitmapDescriptor.defaultMarker));
+                    });
                     // if (location.bbox != null) {
                     //   List<LatLng> coordinates = [
                     //     LatLng(location.bbox![1], result.bbox![0]),
@@ -243,194 +374,27 @@ class MapSampleState extends State<MapSample> {
                 }
               },
             ),
-            StreamBuilder<List<Store>>(
-                stream: FireBaseDataBase.readStores(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Something went wrong! ${snapshot.error}'),
-                    );
-                  } else if (snapshot.hasData) {
-                    snapshot.data!.forEach((e) {
-                      getStoreMarker(e);
-                    });
-
-                    return StreamBuilder<List<StreetSegment>>(
-                        stream: FireBaseDataBase.readStreetSegment(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Text(
-                                  'Something went wrong! ${snapshot.error}'),
-                            );
-                          } else if (snapshot.hasData) {
-                            streetSegments = snapshot.data!;
-                            snapshot.data!.forEach((e) {
-                              _polylines.add(Polyline(
-                                polylineId: PolylineId(e.id.toString()),
-                                points: [
-                                  LatLng(e.StartLat!, e.StartLng!),
-                                  LatLng(e.EndLat!, e.EndLng!)
-                                ],
-                                color: Colors.green,
-                              ));
-                            });
-
-                            return Expanded(
-                                child: GoogleMap(
-                              mapType: MapType.normal,
-                              initialCameraPosition: _kBVNUDorm,
-                              markers: markers,
-                              onMapCreated: (GoogleMapController controller) {
-                                if (!_controller.isCompleted) {
-                                  //first calling is false
-                                  //call "completer()"
-                                  _controller.complete(controller);
-                                } else {
-                                  //other calling, later is true,
-                                  //don't call again completer()
-                                }
-                              },
-                              trafficEnabled: false,
-                              zoomControlsEnabled: true,
-                              myLocationEnabled: true,
-                              myLocationButtonEnabled: true,
-                              polylines: _polylines,
-                              onTap: (value) {
-                                String? streetId = checkAllStreetSegment(value);
-                                context
-                                    .read<HomeCubit>()
-                                    .getPlaceNear(value)
-                                    .then((value) => {
-                                          showModalBottomSheet(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                if (value.status ==
-                                                    StatusType.loaded) {
-                                                  return InkWell(
-                                                    onTap: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (_) =>
-                                                                  ReportScreen(
-                                                                    place: value
-                                                                        .locationSelected,
-                                                                    segmentId:
-                                                                        streetId,
-                                                                  )));
-                                                    },
-                                                    child: Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Container(
-                                                            height: 150,
-                                                            width:
-                                                                double.infinity,
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        20),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                SizedBox(
-                                                                  height: 15,
-                                                                ),
-                                                                Text(
-                                                                  toBeginningOfSentenceCase(value
-                                                                          .locationSelected!
-                                                                          .results!
-                                                                          .first
-                                                                          .name) ??
-                                                                      '',
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      fontSize:
-                                                                          20),
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 15,
-                                                                ),
-                                                                Text(toBeginningOfSentenceCase(value
-                                                                        .locationSelected!
-                                                                        .results!
-                                                                        .first
-                                                                        .address) ??
-                                                                    '')
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () {
-                                                            destinationText =
-                                                                toBeginningOfSentenceCase(value
-                                                                        .locationSelected!
-                                                                        .results!
-                                                                        .first
-                                                                        .name) ??
-                                                                    '';
-                                                            Location? location =
-                                                                value
-                                                                    .locationSelected!
-                                                                    .results!
-                                                                    .first
-                                                                    .location;
-                                                            destination = LatLng(
-                                                                location!.lat ??
-                                                                    0,
-                                                                location.lng ??
-                                                                    0);
-
-                                                            print(source);
-                                                            print(destination);
-
-                                                            if (checkCanRoute())
-                                                              Navigator.of(context).push(MaterialPageRoute(
-                                                                  builder: (_) => DirectionScreen.providers(
-                                                                      sourceText,
-                                                                      source,
-                                                                      destinationText,
-                                                                      destination)));
-                                                            else
-                                                              print("error");
-                                                          },
-                                                          child: Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    20),
-                                                            child: Icon(
-                                                                FontAwesomeIcons
-                                                                    .locationArrow),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                }
-                                                return Container(
-                                                  height: 150,
-                                                  width: double.infinity,
-                                                );
-                                              })
-                                        });
-                              },
-                            ));
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                        });
-                  } else {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                }),
+            Expanded(
+              child: GoogleMap(
+                  mapType: MapType.normal,
+                  initialCameraPosition: initCamera,
+                  markers: markers,
+                  onMapCreated: (GoogleMapController controller) {
+                    if (!_controller.isCompleted) {
+                      //first calling is false
+                      //call "completer()"
+                      _controller.complete(controller);
+                    } else {
+                      //other calling, later is true,
+                      //don't call again completer()
+                    }
+                  },
+                  trafficEnabled: false,
+                  zoomControlsEnabled: true,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  polylines: _polylines),
+            )
           ],
         ),
       ),
@@ -608,33 +572,33 @@ class MapSampleState extends State<MapSample> {
   }
 }
 
-Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
+// Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
 
-/// Initializes map renderer to the `latest` renderer type for Android platform.
-///
-/// The renderer must be requested before creating GoogleMap instances,
-/// as the renderer can be initialized only once per application context.
-Future<AndroidMapRenderer?> initializeMapRenderer() async {
-  if (_initializedRendererCompleter != null) {
-    return _initializedRendererCompleter!.future;
-  }
+// /// Initializes map renderer to the `latest` renderer type for Android platform.
+// ///
+// /// The renderer must be requested before creating GoogleMap instances,
+// /// as the renderer can be initialized only once per application context.
+// Future<AndroidMapRenderer?> initializeMapRenderer() async {
+//   if (_initializedRendererCompleter != null) {
+//     return _initializedRendererCompleter!.future;
+//   }
 
-  final Completer<AndroidMapRenderer?> completer =
-      Completer<AndroidMapRenderer?>();
-  _initializedRendererCompleter = completer;
+//   final Completer<AndroidMapRenderer?> completer =
+//       Completer<AndroidMapRenderer?>();
+//   _initializedRendererCompleter = completer;
 
-  WidgetsFlutterBinding.ensureInitialized();
+//   WidgetsFlutterBinding.ensureInitialized();
 
-  final GoogleMapsFlutterPlatform mapsImplementation =
-      GoogleMapsFlutterPlatform.instance;
-  if (mapsImplementation is GoogleMapsFlutterAndroid) {
-    unawaited(mapsImplementation
-        .initializeWithRenderer(AndroidMapRenderer.latest)
-        .then((AndroidMapRenderer initializedRenderer) =>
-            completer.complete(initializedRenderer)));
-  } else {
-    completer.complete(null);
-  }
+//   final GoogleMapsFlutterPlatform mapsImplementation =
+//       GoogleMapsFlutterPlatform.instance;
+//   if (mapsImplementation is GoogleMapsFlutterAndroid) {
+//     unawaited(mapsImplementation
+//         .initializeWithRenderer(AndroidMapRenderer.latest)
+//         .then((AndroidMapRenderer initializedRenderer) =>
+//             completer.complete(initializedRenderer)));
+//   } else {
+//     completer.complete(null);
+//   }
 
-  return completer.future;
-}
+//   return completer.future;
+// }
