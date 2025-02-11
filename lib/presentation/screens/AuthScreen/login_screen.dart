@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {},
                       child: Text("Forgot password?",
                           textAlign: TextAlign.right,
-                          style: TextStyles.h5
+                          style: TextStyles.h6
                               .copyWith(color: ColorPalette.primaryColor)),
                     ),
                   ),
@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textColor: Colors.white,
                     onTap: () async {
                       if (formSignInKey.currentState!.validate()) {}
-                      await AuthServices.signinUser(_emailController.text,
+                      await AuthServices.signInUser(_emailController.text,
                           _passwordController.text, context);
                     },
                   ),
@@ -161,15 +161,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                           borderRadius: kDefaultBorderRadius,
                           border: Border.all(color: Colors.black)),
-                      padding:
-                          const EdgeInsets.symmetric(vertical: kDefaultPadding),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
                       child: Row(
                         children: [
                           Container(
                             child: ImageHelper.loadFromAsset(
                                 AssetHelper.icoGoogle,
-                                height: 24,
-                                width: 24),
+                                height: 22,
+                                width: 22),
                             padding: const EdgeInsets.only(right: 30, left: 30),
                           ),
                           Text(
@@ -183,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -199,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text("Sign up",
                               style: TextStyles.h6
-                                  .setColor(ColorPalette.grayText)))
+                                  .setColor(ColorPalette.primaryColor)))
                     ],
                   ),
                 ],

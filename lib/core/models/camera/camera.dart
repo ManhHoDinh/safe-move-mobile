@@ -8,12 +8,13 @@ part 'camera.g.dart';
 @freezed
 class Camera with _$Camera {
   const factory Camera({
-    String? id,
+    @JsonKey(name: '_id') String? id,
     String? name,
-    CameraLocation? location,
+    @JsonKey(name: 'loc') CameraLocation? location,
     String? dist,
     bool? ptz,
     int? angle,
+    String? liveviewUrl,
   }) = _Camera;
 
   factory Camera.fromJson(Map<String, Object?> json) => _$CameraFromJson(json);

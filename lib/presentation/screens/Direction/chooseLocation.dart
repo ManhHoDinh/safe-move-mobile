@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:traffic_solution_dsc/core/models/search/mapbox/feature.dart';
 
 import 'package:traffic_solution_dsc/presentation/screens/Direction/SubScreen/DirectionScreen.dart';
+import 'package:traffic_solution_dsc/presentation/screens/Direction/SubScreen/cubit/direction_cubit.dart';
 import 'package:traffic_solution_dsc/presentation/screens/searchScreen/cubit/search_cubit.dart';
 import 'package:traffic_solution_dsc/presentation/screens/searchScreen/searchSreen.dart';
 import 'package:traffic_solution_dsc/presentation/widgets/locationChooseWidget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class ChooseLocation extends StatefulWidget {
-  const ChooseLocation({super.key});
+import '../../../core/models/flooded_point/flood_point.dart';
+import '../../../core/models/search/map_box_suggest.dart';
 
+class ChooseLocation extends StatefulWidget {
+  ChooseLocation({super.key, required this.floodedPoints});
+  List<FloodedPoint> floodedPoints = [];
   @override
   State<ChooseLocation> createState() => _ChooseLocationState();
 }
@@ -66,18 +69,25 @@ class _ChooseLocationState extends State<ChooseLocation> {
                                       )));
                           try {
                             if (result != null) {
-                              Features location = result;
-                              source = LatLng(location.center!.elementAt(1),
-                                  location.center!.first);
+                              Suggestion suggestion = result;
+                              source = suggestion.latLng ?? defaultLatLng;
                               setState(() {
-                                sourceText = location.text ?? "";
+                                sourceText = suggestion.name ?? "";
                               });
-                              if (checkCanRoute())
+                              if (checkCanRoute()) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => DirectionScreen.providers(
+                                        sourceText,
+                                        source,
+                                        destinationText,
+                                        destination,
+                                        widget.floodedPoints)));
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(
                                   content: Text("$source to $destination"),
                                   backgroundColor: Colors.green,
                                 ));
+                              }
                             }
                           } catch (error) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -105,12 +115,10 @@ class _ChooseLocationState extends State<ChooseLocation> {
                                       )));
                           try {
                             if (result != null) {
-                              Features location = result;
-                              destination = LatLng(
-                                  location.center!.elementAt(1),
-                                  location.center!.first);
+                              Suggestion suggestion = result;
+                              destination = suggestion.latLng ?? defaultLatLng;
                               setState(() {
-                                destinationText = location.text ?? "";
+                                destinationText = suggestion.name ?? "";
                               });
 
                               if (checkCanRoute())
@@ -119,7 +127,8 @@ class _ChooseLocationState extends State<ChooseLocation> {
                                         sourceText,
                                         source,
                                         destinationText,
-                                        destination)));
+                                        destination,
+                                        widget.floodedPoints)));
                               else
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(

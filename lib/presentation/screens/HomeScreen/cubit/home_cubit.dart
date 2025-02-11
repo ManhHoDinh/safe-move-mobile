@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:traffic_solution_dsc/core/constraints/status.dart';
 import 'package:traffic_solution_dsc/core/models/camera/camera.dart';
+import 'package:traffic_solution_dsc/core/models/flooded_point/flood_point.dart';
 import 'package:traffic_solution_dsc/core/models/placeNear/placeNear.dart';
 import 'dart:convert' as convert;
 
@@ -61,19 +62,30 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<List<Camera>> fetchCameras() async {
     final response = await http.get(
-      Uri.parse(
-          'https://api.notis.vn/v4/cameras/bybbox?lat1=11.160767&lng1=106.554166&lat2=9.45&lng2=128.99999'),
+      Uri.parse('https://camera-service.onrender.com/cameras?is_enabled=true'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data.map((json) => Camera.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load cameras');
+    }
+  }
+
+  Future<List<FloodedPoint>> fetchFloodedPoints() async {
+    final response = await http.get(
+      Uri.parse('https://flooded-point-service-v1.onrender.com/flood_points'),
       headers: {
         'accept': 'application/json',
-        'device-id': 'bf738a0a3e6eddc2',
       },
     );
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Camera.fromJson(json)).toList();
+      return data.map((json) => FloodedPoint.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load cameras');
+      return [];
     }
   }
 

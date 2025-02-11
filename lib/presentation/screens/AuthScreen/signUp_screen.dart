@@ -63,7 +63,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(height: 20),
                   Container(
                     child: Text(
-                      "Bắt đầu",
+                      "Start",
                       style: TextStyles.h2.copyWith(
                           color: ColorPalette.blackText,
                           fontWeight: FontWeight.bold),
@@ -72,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(height: 20),
                   Container(
                     child: Text(
-                      "Tạo tài khoản đến bước tiếp theo!",
+                      "Create an account to the next step!",
                       style:
                           TextStyles.h5.copyWith(color: ColorPalette.grayText),
                     ),
@@ -80,11 +80,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(height: 20),
                   InputWidget(
                       controller: _nameController,
-                      labelText: 'Họ và tên',
+                      labelText: 'Full name',
                       icon: AssetHelper.icoUser,
                       validator: (input) {
                         if (input?.isEmpty ?? true) {
-                          return "Vui lòng nhập tên!";
+                          return "Please enter name!";
                         }
                       }),
                   SizedBox(height: 20),
@@ -97,9 +97,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
                             .hasMatch(input!);
                         if (input.isEmpty) {
-                          return "Vui lòng nhập email!";
+                          return "Please enter email!";
                         } else if (!emailValid) {
-                          return "Email không tồn tại!";
+                          return "Email is not exist!";
                         }
                       }),
                   SizedBox(height: 20),
@@ -127,7 +127,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         prefixIconConstraints: BoxConstraints(
                           minWidth: 24,
                         ),
-                        labelText: 'Số điện thoại',
+                        labelText: 'Phone number',
                         labelStyle:
                             TextStyles.h6.setColor(ColorPalette.blackText),
                       ),
@@ -136,18 +136,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             RegExp(r'(^(?:[+0]9)?[0-9]{10,11}$)')
                                 .hasMatch(input!);
                         if (input.isEmpty) {
-                          return "Vui lòng nhập số điện thoại!";
+                          return "Please enter phone number!";
                         } else if (!phoneValid) {
-                          return "Số điện thoại không hợp lệ!";
+                          return "Invalid phone number!";
                         }
                       }),
                   SizedBox(height: 20),
                   TextFormField(
                     validator: (input) {
                       if (input == "") {
-                        return "Vui lòng nhập mật khẩu!";
+                        return "Please enter password!";
                       } else if (input != null && input.length <= 6) {
-                        return "Mật khẩu quá ngắn!";
+                        return "Password too short!";
                       } else
                         return null;
                     },
@@ -161,20 +161,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           color: ColorPalette.bgTextFieldColor,
                         ),
                       ),
-                      // suffixIcon: IconButton(
-                      //   icon: Icon(
-                      //     // Based on passwordVisible state choose the icon
-                      //     _passwordVisible
-                      //         ? Icons.visibility
-                      //         : Icons.visibility_off,
-                      //   ),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       _passwordVisible = !_passwordVisible;
-                      //     });
-                      //   },
-                      // ),
-                      labelText: 'Mật khẩu',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          // Based on passwordVisible state choose the icon
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      ),
+                      labelText: 'Password',
                       labelStyle:
                           TextStyles.h6.setColor(ColorPalette.blackText),
                       contentPadding: const EdgeInsets.only(bottom: 14),
@@ -196,12 +196,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     keyboardType: TextInputType.visiblePassword,
                     validator: (input) {
                       if (input == "") {
-                        return "Vui lòng xác nhận mật khẩu!";
+                        return "Please confirm password!";
                       } else if (input != null && input.length <= 6) {
-                        return "Mật khẩu quá ngắn!";
+                        return "Password too short!";
                       } else if (_confirmPasswordController.text !=
                           _passwordController.text) {
-                        return "Xác nhận mật khẩu không khớp!";
+                        return "Confirm password does not match!";
                       } else
                         return null;
                     },
@@ -214,25 +214,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           color: ColorPalette.bgTextFieldColor,
                         ),
                       ),
-                      // suffixIcon: IconButton(
-                      //   icon: Icon(
-                      //     // Based on passwordVisible state choose the icon
-                      //     _confirmPasswordVisible
-                      //         ? Icons.visibility
-                      //         : Icons.visibility_off,
-                      //   ),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       _confirmPasswordVisible = !_confirmPasswordVisible;
-                      //     });
-                      //   },
-                      // ),
-                      labelText: 'Xác nhận mật khẩu',
-                      labelStyle: TextStyles.h6.setColor(ColorPalette.blackText),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          // Based on passwordVisible state choose the icon
+                          _confirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _confirmPasswordVisible = !_confirmPasswordVisible;
+                          });
+                        },
+                      ),
+                      labelText: 'Confirm Password',
+                      labelStyle:
+                          TextStyles.h6.setColor(ColorPalette.blackText),
                       contentPadding: const EdgeInsets.only(bottom: 14),
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       prefixIcon: Container(
-                        child: Image.asset(AssetHelper.icoLock,color:ColorPalette.blackText),
+                        child: Image.asset(AssetHelper.icoLock,
+                            color: ColorPalette.blackText),
                         padding: const EdgeInsets.only(right: 20, left: 20),
                       ),
                       prefixIconConstraints: BoxConstraints(
@@ -261,7 +263,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         },
                       ),
                       Text(
-                        'Bằng cách tạo tài khoản, bạn đồng ý \n với điều khoản của chúng tôi',
+                        'By creating an account, you agree \n to our terms',
                         style: TextStyles.h6,
                       ),
                     ],
@@ -270,7 +272,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     height: 20,
                   ),
                   ButtonWidget(
-                    label: 'Đăng ký',
+                    label: 'Sign Up',
                     color: ColorPalette.primaryColor,
                     textColor: Colors.white,
                     onTap: () async {
@@ -285,22 +287,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Bạn đã có tài khoản?",
+                        "Already have an account?",
                         style: TextStyles.h6.setColor(ColorPalette.grayText),
                       ),
                       TextButton(
                           onPressed: () {
                             Navigator.pushNamed(context, LoginScreen.routeName);
                           },
-                          child: Text("Đăng nhập",
+                          child: Text("Sign In",
                               style: TextStyles.h6
-                                  .setColor(ColorPalette.greenText)))
+                                  .setColor(ColorPalette.primaryColor)))
                     ],
                   ),
                 ],

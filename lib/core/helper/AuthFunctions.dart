@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:traffic_solution_dsc/core/models/user/user.dart';
+import 'package:traffic_solution_dsc/presentation/screens/HomeScreen/HomeScreen.dart';
 
+import '../../presentation/screens/AuthScreen/login_screen.dart';
 import '../../presentation/widgets/dialog.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -28,18 +30,18 @@ class AuthServices {
       );
       DocumentReference doc =
           FirebaseFirestore.instance.collection("Users").doc(uid);
-      await doc.set(user.toJson()).whenComplete(() => showDialog(
-              context: buildContext,
-              builder: (context) {
-                return DialogOverlay(
-                  isSuccess: true,
-                  task: 'Create User',
-                );
-              }))
-          // .whenComplete(() =>
-          //     Navigator.of(buildContext).pushNamed(LoginScreen.routeName)
-          //     )
-          ;
+      await doc.set(user.toJson()).whenComplete(
+          () => Navigator.of(buildContext).pushNamed(LoginScreen.routeName));
+      // showDialog(
+      //     context: buildContext,
+      //     builder: (context) {
+      //       return DialogOverlay(
+      //         isSuccess: true,
+      //         task: 'Create User',
+      //       );
+      //     }))
+      // .whenComplete(() =>
+      //     Navigator.of(buildContext).pushNamed(LoginScreen.routeName));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         ScaffoldMessenger.of(buildContext).showSnackBar(
@@ -74,16 +76,11 @@ class AuthServices {
 
       if (FirebaseAuth.instance.currentUser != null) {
         //await UpdateCurrentUser();
-        await showDialog(
-                context: context,
-                builder: (context) {
-                  return DialogOverlay(
-                    isSuccess: true,
-                    task: 'login',
-                  );
-                });
-            // .whenComplete(() => Navigator.of(context).pushNamedAndRemoveUntil(
-            //     NavigationHome.routeName, (route) => false));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Login Successful')));
+
+        // Navigator.of(context)
+        //     .pushNamedAndRemoveUntil(HomeScreen.routeName, (route) => false);
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -102,23 +99,23 @@ class AuthServices {
     }
   }
 
-  static signinUser(String email, String password, BuildContext context) async {
+  static signInUser(String email, String password, BuildContext context) async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       //await UpdateCurrentUser();
       if (FirebaseAuth.instance.currentUser != null) {
         //await UpdateCurrentUser();
-        await showDialog(
-                context: context,
-                builder: (context) {
-                  return DialogOverlay(
-                    isSuccess: true,
-                    task: 'login',
-                  );
-                });
-            // .whenComplete(() =>
-            //     Navigator.of(context).pushNamed(NavigationHome.routeName));
+        // await showDialog(
+        //         context: context,
+        //         builder: (context) {
+        //           return DialogOverlay(
+        //             isSuccess: true,
+        //             task: 'login',
+        //           );
+        //         })
+        //     .whenComplete(
+        //         () => Navigator.of(context).pushNamed(HomeScreen.routeName));
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

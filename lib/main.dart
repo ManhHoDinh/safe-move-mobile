@@ -1,14 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:traffic_solution_dsc/core/helper/AuthFunctions.dart';
 import 'package:traffic_solution_dsc/core/helper/app_colors.dart';
 import 'package:traffic_solution_dsc/core/services/firebase_options.dart';
-import 'package:traffic_solution_dsc/presentation/screens/HomeScreen/HomeScreen.dart';
+import 'package:traffic_solution_dsc/notification_service.dart';
 import 'package:traffic_solution_dsc/presentation/screens/splash/splash_screen.dart';
 
 import 'presentation/Routes/app_router.dart';
 import 'presentation/screens/AuthScreen/login_screen.dart';
+import 'presentation/screens/HomeScreen/cubit/home_cubit.dart';
+import 'presentation/screens/MainScreen/bottom_navigation_home.dart';
 
 bool firstTimeUser = true;
 void main() async {
@@ -16,6 +19,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  NotificationService notificationService = NotificationService();
+  await notificationService.initialize();
 
   runApp(SafeMoveApp());
 }
@@ -39,7 +45,7 @@ class _SafeMoveAppState extends State<SafeMoveApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SafeMove',
+      title: 'Safe Move',
       theme: ThemeData(
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.contentColorWhite,
@@ -92,7 +98,12 @@ class AuthenticationWrapperState extends State<AuthenticationWrapper> {
                         return SplashScreen();
                       } else {
                         // If the update is complete, navigate to the MainScreen
-                        return HomeScreen();
+                        return Provider<HomeCubit>(
+                          create: (_) => HomeCubit(),
+                          builder: (context, child) {
+                            return BottomHomeScreen(); // Chạy MapSample trong phạm vi Provider
+                          },
+                        );
                       }
                     },
                   );

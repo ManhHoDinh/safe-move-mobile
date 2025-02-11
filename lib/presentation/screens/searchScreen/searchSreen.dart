@@ -58,12 +58,16 @@ class _SearchScreenState extends State<SearchScreen> {
             return state.when(
                 initial: () => Center(),
                 loading: () => Center(child: CircularProgressIndicator()),
-                loaded: (location) => ListView.builder(
-                    itemCount: location?.length ?? 0,
+                loaded: (suggestion) => ListView.builder(
+                    itemCount: suggestion?.length ?? 0,
                     itemBuilder: (context, index) {
                       return InkWell(
-                        onTap: () {
-                          Navigator.of(context).pop(location[index]);
+                        onTap: () async {
+                          suggestion[index].latLng = await context
+                              .read<SearchCubit>()
+                              .retrieveFeature(
+                                  suggestion[index].mapboxId ?? '');
+                          Navigator.of(context).pop(suggestion[index]);
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 20, left: 20, right: 20),
@@ -83,11 +87,15 @@ class _SearchScreenState extends State<SearchScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    location![index].text.toString(),
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15),
+                                  Container(
+                                    width: 290,
+                                    child: Text(
+                                      suggestion![index].name.toString(),
+                                      overflow: TextOverflow.clip,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 15),
+                                    ),
                                   ),
                                   SizedBox(
                                     height: 5,
@@ -95,7 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   Container(
                                     width: 290,
                                     child: Text(
-                                      location[index].placeName.toString(),
+                                      suggestion![index].fullAddress.toString(),
                                       overflow: TextOverflow.clip,
                                     ),
                                   )

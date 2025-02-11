@@ -31,7 +31,9 @@ class ButtonWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: kDefaultPadding),
         child: Text(
           label,
-          style: TextStyles.h6.copyWith(color: textColor ?? ColorPalette.blackText, fontWeight: FontWeight.bold),
+          style: TextStyles.h6.copyWith(
+              color: textColor ?? ColorPalette.blackText,
+              fontWeight: FontWeight.bold),
         ),
       ),
     );

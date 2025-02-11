@@ -20,12 +20,15 @@ Camera _$CameraFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Camera {
+  @JsonKey(name: '_id')
   String? get id => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
+  @JsonKey(name: 'loc')
   CameraLocation? get location => throw _privateConstructorUsedError;
   String? get dist => throw _privateConstructorUsedError;
   bool? get ptz => throw _privateConstructorUsedError;
   int? get angle => throw _privateConstructorUsedError;
+  String? get liveviewUrl => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -38,12 +41,13 @@ abstract class $CameraCopyWith<$Res> {
       _$CameraCopyWithImpl<$Res, Camera>;
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: '_id') String? id,
       String? name,
-      CameraLocation? location,
+      @JsonKey(name: 'loc') CameraLocation? location,
       String? dist,
       bool? ptz,
-      int? angle});
+      int? angle,
+      String? liveviewUrl});
 
   $CameraLocationCopyWith<$Res>? get location;
 }
@@ -67,6 +71,7 @@ class _$CameraCopyWithImpl<$Res, $Val extends Camera>
     Object? dist = freezed,
     Object? ptz = freezed,
     Object? angle = freezed,
+    Object? liveviewUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -93,6 +98,10 @@ class _$CameraCopyWithImpl<$Res, $Val extends Camera>
           ? _value.angle
           : angle // ignore: cast_nullable_to_non_nullable
               as int?,
+      liveviewUrl: freezed == liveviewUrl
+          ? _value.liveviewUrl
+          : liveviewUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 
@@ -116,12 +125,13 @@ abstract class _$$_CameraCopyWith<$Res> implements $CameraCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: '_id') String? id,
       String? name,
-      CameraLocation? location,
+      @JsonKey(name: 'loc') CameraLocation? location,
       String? dist,
       bool? ptz,
-      int? angle});
+      int? angle,
+      String? liveviewUrl});
 
   @override
   $CameraLocationCopyWith<$Res>? get location;
@@ -143,6 +153,7 @@ class __$$_CameraCopyWithImpl<$Res>
     Object? dist = freezed,
     Object? ptz = freezed,
     Object? angle = freezed,
+    Object? liveviewUrl = freezed,
   }) {
     return _then(_$_Camera(
       id: freezed == id
@@ -169,6 +180,10 @@ class __$$_CameraCopyWithImpl<$Res>
           ? _value.angle
           : angle // ignore: cast_nullable_to_non_nullable
               as int?,
+      liveviewUrl: freezed == liveviewUrl
+          ? _value.liveviewUrl
+          : liveviewUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -177,16 +192,24 @@ class __$$_CameraCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_Camera with DiagnosticableTreeMixin implements _Camera {
   const _$_Camera(
-      {this.id, this.name, this.location, this.dist, this.ptz, this.angle});
+      {@JsonKey(name: '_id') this.id,
+      this.name,
+      @JsonKey(name: 'loc') this.location,
+      this.dist,
+      this.ptz,
+      this.angle,
+      this.liveviewUrl});
 
   factory _$_Camera.fromJson(Map<String, dynamic> json) =>
       _$$_CameraFromJson(json);
 
   @override
+  @JsonKey(name: '_id')
   final String? id;
   @override
   final String? name;
   @override
+  @JsonKey(name: 'loc')
   final CameraLocation? location;
   @override
   final String? dist;
@@ -194,10 +217,12 @@ class _$_Camera with DiagnosticableTreeMixin implements _Camera {
   final bool? ptz;
   @override
   final int? angle;
+  @override
+  final String? liveviewUrl;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Camera(_id: $id, name: $name, location: $location, dist: $dist, ptz: $ptz, angle: $angle)';
+    return 'Camera(id: $id, name: $name, location: $location, dist: $dist, ptz: $ptz, angle: $angle, liveviewUrl: $liveviewUrl)';
   }
 
   @override
@@ -205,12 +230,13 @@ class _$_Camera with DiagnosticableTreeMixin implements _Camera {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'Camera'))
-      ..add(DiagnosticsProperty('_id', id))
+      ..add(DiagnosticsProperty('id', id))
       ..add(DiagnosticsProperty('name', name))
       ..add(DiagnosticsProperty('location', location))
       ..add(DiagnosticsProperty('dist', dist))
       ..add(DiagnosticsProperty('ptz', ptz))
-      ..add(DiagnosticsProperty('angle', angle));
+      ..add(DiagnosticsProperty('angle', angle))
+      ..add(DiagnosticsProperty('liveviewUrl', liveviewUrl));
   }
 
   @override
@@ -224,13 +250,15 @@ class _$_Camera with DiagnosticableTreeMixin implements _Camera {
                 other.location == location) &&
             (identical(other.dist, dist) || other.dist == dist) &&
             (identical(other.ptz, ptz) || other.ptz == ptz) &&
-            (identical(other.angle, angle) || other.angle == angle));
+            (identical(other.angle, angle) || other.angle == angle) &&
+            (identical(other.liveviewUrl, liveviewUrl) ||
+                other.liveviewUrl == liveviewUrl));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, name, location, dist, ptz, angle);
+  int get hashCode => Object.hash(
+      runtimeType, id, name, location, dist, ptz, angle, liveviewUrl);
 
   @JsonKey(ignore: true)
   @override
@@ -248,20 +276,23 @@ class _$_Camera with DiagnosticableTreeMixin implements _Camera {
 
 abstract class _Camera implements Camera {
   const factory _Camera(
-      {final String? id,
+      {@JsonKey(name: '_id') final String? id,
       final String? name,
-      final CameraLocation? location,
+      @JsonKey(name: 'loc') final CameraLocation? location,
       final String? dist,
       final bool? ptz,
-      final int? angle}) = _$_Camera;
+      final int? angle,
+      final String? liveviewUrl}) = _$_Camera;
 
   factory _Camera.fromJson(Map<String, dynamic> json) = _$_Camera.fromJson;
 
   @override
+  @JsonKey(name: '_id')
   String? get id;
   @override
   String? get name;
   @override
+  @JsonKey(name: 'loc')
   CameraLocation? get location;
   @override
   String? get dist;
@@ -269,6 +300,8 @@ abstract class _Camera implements Camera {
   bool? get ptz;
   @override
   int? get angle;
+  @override
+  String? get liveviewUrl;
   @override
   @JsonKey(ignore: true)
   _$$_CameraCopyWith<_$_Camera> get copyWith =>

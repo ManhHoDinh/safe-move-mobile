@@ -61,6 +61,7 @@ dependencies:
   logger: ^1.1.0
   get_it: ^7.2.0
   injectable: ^2.1.0
+  timezone: ^0.9.4
 
   #geospatial analysis
   font_awesome_flutter: ^10.5.0
@@ -84,6 +85,12 @@ dependencies:
   flutter_native_splash: ^2.2.14
   flutter_launcher_icons: ^0.13.1
   google_sign_in: ^6.2.1
+  image_picker: ^1.0.8
+  firebase_messaging: ^14.7.19
+  flutter_local_notifications: ^18.0.1
+  url_launcher: ^6.2.6
+  share_plus: ^6.3.0
+  path_provider: ^2.0.11
 
 dev_dependencies:
   flutter_test:

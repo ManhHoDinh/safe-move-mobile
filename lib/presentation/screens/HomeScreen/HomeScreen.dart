@@ -1,3 +1,5 @@
+// HomeScreen.dart
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
@@ -13,18 +15,22 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:traffic_solution_dsc/core/constraints/status.dart';
+import 'package:traffic_solution_dsc/core/helper/AuthFunctions.dart';
 import 'package:traffic_solution_dsc/core/helper/assets_helper.dart';
 import 'package:traffic_solution_dsc/core/models/camera/camera.dart';
+import 'package:traffic_solution_dsc/core/models/flooded_point/flood_point.dart';
 import 'package:traffic_solution_dsc/core/models/placeNear/locations.dart';
-import 'package:traffic_solution_dsc/core/models/search/mapbox/feature.dart';
+import 'package:traffic_solution_dsc/core/models/search/map_box_suggest.dart';
 import 'package:traffic_solution_dsc/core/networks/firebase_request.dart';
-import 'package:traffic_solution_dsc/presentation/screens/CameraDetail/CameraDetail.dart';
+import 'package:traffic_solution_dsc/notification_service.dart';
+import 'package:traffic_solution_dsc/presentation/screens/CameraScreen/CameraDetail.dart';
 import 'package:traffic_solution_dsc/presentation/screens/Direction/SubScreen/DirectionScreen.dart';
 import 'package:traffic_solution_dsc/presentation/screens/Direction/chooseLocation.dart';
 import 'package:traffic_solution_dsc/presentation/screens/HomeScreen/cubit/home_cubit.dart';
-
+import 'package:traffic_solution_dsc/presentation/screens/ProvideImage/floodInformationDetailScreen.dart';
 import 'package:traffic_solution_dsc/presentation/screens/ReportScreen/reportScreen.dart';
 import 'package:traffic_solution_dsc/presentation/screens/searchScreen/cubit/search_cubit.dart';
 import 'package:traffic_solution_dsc/presentation/screens/searchScreen/searchSreen.dart';
@@ -33,12 +39,17 @@ import 'package:label_marker/label_marker.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
+import '../../../core/helper/app_colors.dart';
+import '../../../core/helper/send_notification.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
   static String routeName = "/home";
   static Page page() => const MaterialPage<void>(child: HomeScreen());
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
+
   static MultiBlocProvider provider() {
     return MultiBlocProvider(
       providers: [
@@ -51,37 +62,20 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return MapSample();
-  }
-}
-
-class MapSample extends StatefulWidget {
-  const MapSample({super.key});
-
-  @override
-  State<MapSample> createState() => MapSampleState();
-}
-
-class MapSampleState extends State<MapSample> {
+class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  // static const LatLng _pVNUDorm =
-  //     LatLng(10.882495758523962, 106.78255494069631);
   static const CameraPosition initCamera = CameraPosition(
     target: LatLng(10.80498476893258, 106.75270736217499),
     zoom: 11,
   );
   LatLng defaultLocation = LatLng(0, 0);
-  //static const LatLng _pUIT = LatLng(10.870251224876043, 106.80337596158505);
   late BitmapDescriptor enableStoreIcon;
   late BitmapDescriptor selectedStoreIcon;
   late BitmapDescriptor disableStoreIcon;
 
-  Future getIcon() async {
+  Future<void> getIcon() async {
     enableStoreIcon = await createCustomMarkerFromAsset(
         AssetHelper.enableStoreMarkerIcon, // Path to your asset image
         Size(100, 100) // Height of the custom marker
@@ -117,24 +111,16 @@ class MapSampleState extends State<MapSample> {
     return customIcon;
   }
 
-  // getStoreMarker(Store e) async {
-  //   markers.add(Marker(
-  //       markerId: MarkerId(e.id!),
-  //       position: LatLng(e.latitude!, e.longitude!),
-  //       icon: (e.status ?? true) ? enableStoreIcon : disableStoreIcon,
-  //       onTap: () {
-  //         print("Hello");
-  //       }));
-  // }
-
-// created method for getting user current location
-
   Set<Marker> markers = {};
   Future<void> moveCamera(CameraPosition camera) async {
     try {
+      if (!mounted) return;
       final GoogleMapController controller = await _controller.future;
-      controller.moveCamera(CameraUpdate.newCameraPosition(camera));
-    } catch (e) {}
+      controller.animateCamera(CameraUpdate.newCameraPosition(camera));
+    } catch (e) {
+      // Handle the error as needed
+      print('Error moving camera: $e');
+    }
   }
 
   bool checkCanRoute() {
@@ -143,27 +129,34 @@ class MapSampleState extends State<MapSample> {
         source != destination;
   }
 
-  late BitmapDescriptor customIcon;
   Set<Polyline> _polylines = {};
   LatLng source = LatLng(0, 0);
   LatLng destination = LatLng(0, 0);
   String sourceText = 'Your location';
   String destinationText = "Choose destination";
+  Set<Circle> circles = {};
+  List<FloodedPoint> floodPoints = [];
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
+    loadFloodedPointData();
     WidgetsFlutterBinding.ensureInitialized();
 
     WidgetsBinding.instance.endOfFrame.then((value) async {
-      getIcon().whenComplete(() {
-        setState(() {});
-      });
-      source = await context
-          .read<HomeCubit>()
-          .getUserCurrentLocation()
-          .whenComplete(() => setState(() {}));
+      await getIcon();
+      setState(() {});
+
+      try {
+        source = await context
+            .read<HomeCubit>()
+            .getUserCurrentLocation()
+            .whenComplete(() {
+          setState(() {});
+        });
+      } catch (e) {
+        print('Error getting user location: $e');
+      }
 
       moveCamera(CameraPosition(target: source, zoom: 11));
       final GoogleMapsFlutterPlatform mapsImplementation =
@@ -178,7 +171,6 @@ class MapSampleState extends State<MapSample> {
 
   Future<void> _loadCameras() async {
     List<Camera> cameras = await context.read<HomeCubit>().fetchCameras();
-    print(cameras);
     setState(() {
       markers.addAll(cameras.map((camera) {
         return Marker(
@@ -288,7 +280,8 @@ class MapSampleState extends State<MapSample> {
                                                           sourceText,
                                                           source,
                                                           destinationText,
-                                                          destination)));
+                                                          destination,
+                                                          floodPoints)));
                                         else
                                           print("error");
                                       },
@@ -314,9 +307,267 @@ class MapSampleState extends State<MapSample> {
     });
   }
 
+// Kiểm tra xem vị trí của người dùng có nằm trong bất kỳ vùng lũ nào không
+  bool isUserInFloodZone(LatLng userLocation) {
+    for (var circle in circles) {
+      double distance = distanceBetweenLatLng(
+        userLocation.latitude,
+        userLocation.longitude,
+        circle.center.latitude,
+        circle.center.longitude,
+      );
+      print('Distance: $distance');
+      print('Avoidance distance: $avoidanceDistance');
+
+      // Nếu khoảng cách nhỏ hơn bán kính của vùng lũ, người dùng nằm trong vùng lũ
+      if (distance * 1000 <= avoidanceDistance) {
+        // radius của Circle là mét, đổi ra km
+        print(circle.radius);
+
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Timer? locationCheckTimer;
+  double notificationDuration = 1.0; // Thời gian hiển thị thông báo (giây)
+  double avoidanceDistance = 100.0; // Khoảng cách tránh xa điểm lũ (mét)
+  bool isNotificationEnabled = true;
+
+  void _startTimer() {
+    print('Start Timer');
+    if (mounted) {
+      locationCheckTimer = Timer.periodic(
+        Duration(minutes: notificationDuration.toInt()),
+        (timer) async {
+          await _loadSettings();
+          Position position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+          );
+          LatLng userLocation = LatLng(position.latitude, position.longitude);
+          print('User location: $userLocation');
+          if (isUserInFloodZone(userLocation)) {
+            // Gửi thông báo cho người dùng
+            if (isNotificationEnabled) {
+              NotificationService.showNotification(
+                'Cảnh báo lũ lụt',
+                'Bạn đang ở trong bán kính ${avoidanceDistance}m vùng lũ lụt',
+              );
+              await sendNotification(
+                userId: AuthServices.CurrentUser!.Id,
+                title: 'Cảnh báo lũ lụt',
+                message:
+                    'Bạn đang ở trong bán kính ${avoidanceDistance}m vùng lũ lụt',
+              );
+            }
+            print(isNotificationEnabled);
+          }
+        },
+      );
+    }
+  }
+
+  void _cancelTimer() {
+    if (locationCheckTimer != null) {
+      locationCheckTimer!.cancel();
+      locationCheckTimer = null;
+    }
+  }
+
+  Future<void> _loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    notificationDuration = prefs.getDouble('notificationDuration') ?? 1.0;
+    avoidanceDistance = prefs.getDouble('avoidanceDistance') ?? 100.0;
+    isNotificationEnabled = prefs.getBool('isNotificationEnabled') ?? true;
+  }
+
+  Future<void> loadFloodedPointData() async {
+    floodPoints = await context.read<HomeCubit>().fetchFloodedPoints();
+    _addFloodCircles(floodPoints);
+    await _loadSettings();
+
+    _startTimer();
+  }
+
+  void _addFloodCircles(List<FloodedPoint> floodPoints) {
+    setState(() {
+      circles.clear(); // Clear existing circles to avoid duplicates
+      circles.addAll(floodPoints.map((floodPoint) {
+        return Circle(
+          consumeTapEvents: true,
+          onTap: () {
+            context
+                .read<HomeCubit>()
+                .getPlaceNear(
+                    LatLng(floodPoint.latitude ?? 0, floodPoint.longitude ?? 0))
+                .then((value) => {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            if (value.status == StatusType.loaded) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          FloodInformationDetailScreen(
+                                        floodInformationId:
+                                            floodPoint.flood_information_id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 180,
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            // Optional: Add flood point name if available
+                                            // Text(
+                                            //   toBeginningOfSentenceCase(floodPoint.name) ?? '',
+                                            //   style: TextStyle(
+                                            //       color: Colors.black,
+                                            //       fontWeight: FontWeight.bold,
+                                            //       fontSize: 20),
+                                            // ),
+                                            // SizedBox(
+                                            //   height: 15,
+                                            // ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(toBeginningOfSentenceCase(
+                                                        value
+                                                            .locationSelected!
+                                                            .results!
+                                                            .first
+                                                            .name) ??
+                                                    ''),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Text(toBeginningOfSentenceCase(
+                                                        value
+                                                            .locationSelected!
+                                                            .results!
+                                                            .first
+                                                            .address) ??
+                                                    ''),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        destinationText =
+                                            toBeginningOfSentenceCase(value
+                                                    .locationSelected!
+                                                    .results!
+                                                    .first
+                                                    .name) ??
+                                                '';
+                                        Location? location = value
+                                            .locationSelected!
+                                            .results!
+                                            .first
+                                            .location;
+                                        destination = LatLng(location!.lat ?? 0,
+                                            location.lng ?? 0);
+
+                                        print(source);
+                                        print(destination);
+
+                                        if (checkCanRoute())
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      DirectionScreen.providers(
+                                                          sourceText,
+                                                          source,
+                                                          destinationText,
+                                                          destination,
+                                                          floodPoints)));
+                                        else
+                                          print("error");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(20),
+                                        child: Icon(
+                                            FontAwesomeIcons.locationArrow),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return Container(
+                              height: 150,
+                              width: double.infinity,
+                            );
+                          })
+                    });
+          },
+          circleId: CircleId(floodPoint.id.toString()),
+          center: LatLng(
+            floodPoint.latitude ?? 0,
+            floodPoint.longitude ?? 0,
+          ),
+          radius: 500,
+          fillColor: AppColors.getFloodLevelColor(floodPoint.floodLevel ?? 1)
+              .withOpacity(0.5), // Optional: Adjust opacity
+          strokeColor: AppColors.getFloodLevelColor(floodPoint.floodLevel ?? 1),
+          strokeWidth: 2,
+        );
+      }));
+    });
+  }
+
+  @override
+  void dispose() {
+    locationCheckTimer?.cancel(); // Hủy Timer khi widget bị hủy
+    locationCheckTimer = null;
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    print(state);
+    print("Change here");
+    if (state == AppLifecycleState.paused) {
+      print('Home paused');
+
+      _cancelTimer();
+    } else if (state == AppLifecycleState.resumed) {
+      print('Home resumed');
+      loadFloodedPointData();
+    }
+  }
+
+  // Method to refresh data
+  void refreshData() {
+    loadFloodedPointData();
+  }
+
   @override
   Widget build(BuildContext context) {
-// make sure to initialize before map loading
+    // Make sure to initialize before map loading
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -342,32 +593,22 @@ class MapSampleState extends State<MapSample> {
                         )));
                 try {
                   if (result != null) {
-                    Features location = result;
-                    LatLng latLng = LatLng(
-                        location.center!.elementAt(1), location.center!.first);
-
-                    setState(() {
-                      markers.addLabelMarker(LabelMarker(
-                          label: location.text!,
-                          markerId: MarkerId(location.text!),
-                          position: latLng,
-                          backgroundColor: Colors.green,
-                          icon: BitmapDescriptor.defaultMarker));
-                    });
-                    // if (location.bbox != null) {
-                    //   List<LatLng> coordinates = [
-                    //     LatLng(location.bbox![1], result.bbox![0]),
-                    //     LatLng(location.bbox![3], result.bbox![2]),
-                    //   ];
-
-                    //   double zoomLevel = calculateZoomLevel(coordinates);
-                    //   print(zoomLevel);
-                    //   context.read<HomeCubit>().getCameraPostion(latLng);
-                    //   moveCamera(
-                    //       CameraPosition(target: latLng, zoom: zoomLevel));
-                    // } else {
-                    moveCamera(CameraPosition(target: latLng, zoom: 13));
-                    //  }
+                    Suggestion location = result;
+                    if (location.latLng != null) {
+                      setState(() {
+                        markers.add(Marker(
+                          icon: BitmapDescriptor.defaultMarkerWithHue(
+                              BitmapDescriptor.hueYellow),
+                          markerId: MarkerId(location.mapboxId!),
+                          position: location.latLng!,
+                          infoWindow: InfoWindow(
+                              title: location.name, snippet: location.address),
+                        ));
+                        print(markers);
+                        moveCamera(
+                            CameraPosition(target: location.latLng!, zoom: 13));
+                      });
+                    }
                   }
                 } catch (e) {
                   print(e.toString());
@@ -381,121 +622,39 @@ class MapSampleState extends State<MapSample> {
                   markers: markers,
                   onMapCreated: (GoogleMapController controller) {
                     if (!_controller.isCompleted) {
-                      //first calling is false
-                      //call "completer()"
+                      // First call, complete the controller
                       _controller.complete(controller);
                     } else {
-                      //other calling, later is true,
-                      //don't call again completer()
+                      // Subsequent calls, do nothing
                     }
                   },
-                  trafficEnabled: false,
+                  trafficEnabled: true,
                   zoomControlsEnabled: true,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
+                  circles: circles,
                   polylines: _polylines),
             )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 50.0), // 60px from bottom
+        child: FloatingActionButton(
           onPressed: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => ChooseLocation()));
+            print("hihi");
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ChooseLocation(
+                floodedPoints: floodPoints,
+              ),
+            ));
           },
-          child: Icon(Icons.directions)),
-
-      // bottomSheet: BlocBuilder<HomeCubit, HomeState>(
-      //   buildWhen: (previous, current) => true,
-      //   builder: (context, state) {
-      //     if (defaultLocation != LatLng(0, 0)) {
-      //       context
-      //           .read<HomeCubit>()
-      //           .getPlaceNear(state.data!.locationSelected);
-      //       return Container(
-      //         height: 150,
-      //       );
-      //     }
-
-      //     return Container(
-      //       height: 0,
-      //     );
-      //   },
-      // ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {
-      //     // getUserCurrentLocation().then((value) async {
-      //     //   print(value.latitude.toString() + " " + value.longitude.toString());
-
-      //     //   // marker added for current users location
-
-      //     //   // specified current users location
-      //     //   CameraPosition cameraPosition = new CameraPosition(
-      //     //     target: LatLng(value.latitude, value.longitude),
-      //     //     zoom: 14,
-      //     //   );
-
-      //     //   final GoogleMapController controller = await _controller.future;
-      //     //   controller
-      //     //       .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-      //     //   setState(() {});
-      //     // });
-      //   },
-      //   label: const Text(''),
-      //   icon: const Icon(Icons.directions),
-      // ),
+          child: Icon(Icons.directions),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-
-  // Future<void> _goToTheLake() async {
-  //   final GoogleMapController controller = await _controller.future;
-  //   await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
-  // }
-//   double calculateDistance(LatLng point1, LatLng point2) {
-//   const double earthRadius = 6371; // Earth's radius in kilometers
-
-//   double lat1 = point1.latitude;
-//   double lon1 = point1.longitude;
-//   double lat2 = point2.latitude;
-//   double lon2 = point2.longitude;
-
-//   double dLat = radians(lat2 - lat1);
-//   double dLon = radians(lon2 - lon1);
-
-//   double a = sin(dLat / 2) * sin(dLat / 2) +
-//       cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
-
-//   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-//   double distance = earthRadius * c; // Distance in kilometers
-//   return distance;
-// }
-
-//   void _onTap(LatLng tappedPoint) {
-//     double minDistance = double.infinity;
-
-//     // Iterate through the polyline coordinates and calculate the distance
-//     for (int i = 0; i < polylineCoordinates.length - 1; i++) {
-//       final LatLng point1 = polylineCoordinates[i];
-//       final LatLng point2 = polylineCoordinates[i + 1];
-
-//       // Calculate the distance between the clicked point and the polyline segment
-//       final double distance = LatLng.distance(tappedPoint, point1, point2);
-
-//       // Check if this distance is smaller than the minimum distance found so far
-//       if (distance < minDistance) {
-//         minDistance = distance;
-//       }
-//     }
-
-//     // Define a threshold (in degrees) to consider it a click near the polyline
-//     final double clickThreshold = 0.01;
-
-//     if (minDistance < clickThreshold) {
-//       // The click is near the polyline
-//       print('Clicked near the polyline!');
-//     }
-//   }
 
   double calculateZoomLevel(List<LatLng> boundingBox) {
     // Tính toán độ rộng của khu vực theo kinh tuyến
@@ -571,34 +730,3 @@ class MapSampleState extends State<MapSample> {
     }
   }
 }
-
-// Completer<AndroidMapRenderer?>? _initializedRendererCompleter;
-
-// /// Initializes map renderer to the `latest` renderer type for Android platform.
-// ///
-// /// The renderer must be requested before creating GoogleMap instances,
-// /// as the renderer can be initialized only once per application context.
-// Future<AndroidMapRenderer?> initializeMapRenderer() async {
-//   if (_initializedRendererCompleter != null) {
-//     return _initializedRendererCompleter!.future;
-//   }
-
-//   final Completer<AndroidMapRenderer?> completer =
-//       Completer<AndroidMapRenderer?>();
-//   _initializedRendererCompleter = completer;
-
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   final GoogleMapsFlutterPlatform mapsImplementation =
-//       GoogleMapsFlutterPlatform.instance;
-//   if (mapsImplementation is GoogleMapsFlutterAndroid) {
-//     unawaited(mapsImplementation
-//         .initializeWithRenderer(AndroidMapRenderer.latest)
-//         .then((AndroidMapRenderer initializedRenderer) =>
-//             completer.complete(initializedRenderer)));
-//   } else {
-//     completer.complete(null);
-//   }
-
-//   return completer.future;
-// }

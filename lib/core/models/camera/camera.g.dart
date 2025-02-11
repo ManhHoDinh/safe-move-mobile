@@ -15,13 +15,15 @@ _$_Camera _$$_CameraFromJson(Map<String, dynamic> json) => _$_Camera(
       dist: json['dist'] as String?,
       ptz: json['ptz'] as bool?,
       angle: json['angle'] as int?,
+      liveviewUrl: json['liveviewUrl'] as String?,
     );
 
 Map<String, dynamic> _$$_CameraToJson(_$_Camera instance) => <String, dynamic>{
-      'id': instance.id,
+      '_id': instance.id,
       'name': instance.name,
-      'location': instance.location,
+      'loc': instance.location,
       'dist': instance.dist,
       'ptz': instance.ptz,
       'angle': instance.angle,
+      'liveviewUrl': instance.liveviewUrl,
     };
